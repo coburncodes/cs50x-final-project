@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Edit a Hike
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <img src="/static/favicon.ico" id="edit-img">
+    </div>
+
+    <div class="section">
+        <form action="/edit" method="post">
+
+            <div class="mb-3">
+                <h3>Select Hike:</h3>
+                <select name="hike" id="hike">
+                    {% for my_hike in my_hikes %}
+                        <option value="{{ db.execute("SELECT name FROM hikes WHERE id=?", my_hike["hike_id"])[0]["name"] }}">{{ db.execute("SELECT name FROM hikes WHERE id=?", my_hike["hike_id"])[0]["name"] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <h3>Date Completed:</h3>
+                <input type="date" name="date">
+            </div>
+
+            <div class="mb-3">
+                <h3>Rating:</h3>
+                <select name="rating" id="rating">
+                    {% for num in range(10, 0, -1) %}
+                        <option value="{{ num * 0.5 }}">{{ num * 0.5 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <h3>Review:</h3>
+                <textarea name="review" id="review" class="form-control mx-auto w-auto" placeholder="Update your review"></textarea>
+            </div>
+
+            <button class="btn btn-success" type="submit">Update</button>
+
+        </form>
+    </div>
+
+{% endblock %}

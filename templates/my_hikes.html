@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My Completed Hikes
+{% endblock %}
+
+{% block main %}
+
+    <div class="section">
+
+        <h1>My Hikes: </h1>
+
+        {% if not number %}
+            <h2>No hikes completed yet!</h2>
+        {% endif %}
+
+        {% if number %}
+            <h2>{{ number }} of {{ total_hikes }} Completed</h2>
+
+            <div class="mb-3">
+                <p class="mb-0">Sort:</p>
+                <form action="/my_hikes" method="post">
+                    <select name="filter" class="mx-auto w-auto">
+                        <option>Region</option>
+                        <option>Name</option>
+                        <option>Difficulty</option>
+                        <option>Rating</option>
+                    </select>
+                    <button class="btn btn-success btn-sm" type="submit">Sort</button>
+                </form>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">region</th>
+                        <th scope="col">name</th>
+                        <th scope="col">difficulty</th>
+                        <th scope="col">miles</th>
+                        <th scope="col">rating</th>
+                        <th scope="col">review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hike in my_hikes %}
+                    <tr>
+                        <td>{{ hike["area"] }}</td>
+                        <td>{{ hike["name"] }}</td>
+                        <td>{{ hike["difficulty"] }}</td>
+                        <td>{{ hike["distance"] }}</td>
+                        <td>{{ hike["rating"] }}</td>
+                        <td>{{ hike["review"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+    </div>
+
+    <div class="container">
+
+        <div class="mb-2">
+            <a href="/add_hike" class="text-success">Add Hike</a>
+        </div>
+
+        {% if number %}
+            <div class="mb-2">
+                <a href="/edit" class="text-primary">Edit Hike</a>
+            </div>
+            <div class="mb-2">
+                <a href="/delete" class="text-danger">Delete Hike</a>
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock %}

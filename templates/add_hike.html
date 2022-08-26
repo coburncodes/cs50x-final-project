@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Complete a Hike
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <img src="/static/favicon.ico">
+    </div>
+
+    <div class="section">
+        <form action="/add_hike" method="post">
+
+            <div class="mb-4">
+                <h3 class="d-inline align-middle">Select Hike: </h3>
+                <select name="hike" id="hike" class="form-control mx-auto w-auto d-inline align-middle">
+                    {% for hike in hikes %}
+                        <option value="{{ hike["name"] }}">{{ hike["name"] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <h3 class="d-inline align-middle">Date Completed: </h3>
+                <input type="date" name="date" class="form-control mx-auto w-auto d-inline align-middle">
+            </div>
+
+            <div class="mb-4">
+                <h3 class="d-inline align-middle">Rating: </h3>
+                <select name="rating" id="rating" class="form-control mx-auto w-auto d-inline align-middle">
+                    {% for num in range(10, 0, -1) %}
+                        <option value="{{ num * 0.5 }}">{{ num * 0.5 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <h3 class="d-inline align-middle">Review: </h3>
+                <textarea name="review" id="review" class="form-control mx-auto w-auto d-inline align-middle" placeholder="Add your review here!" default="No review"></textarea>
+            </div>
+
+            <button class="btn btn-success" type="submit">Submit</button>
+
+        </form>
+    </div>
+
+{% endblock %}

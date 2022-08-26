@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Error
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <img src="/static/favicon.ico">
+    </div>
+
+    <h1 style="color: red">Error {{ code }}</h1>
+
+    <h3>{{ message }}</h3>
+    
+{% endblock %}

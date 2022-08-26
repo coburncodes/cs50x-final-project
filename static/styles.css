@@ -1,0 +1,42 @@
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: #FAEDCD;
+}
+
+img {
+    max-width: 700px;
+}
+
+.header {
+    font-family: 'Rock Salt', cursive;
+}
+
+.navbar-nav {
+    font-family: 'IM Fell Great Primer', serif;
+}
+
+.navbar {
+    background-color: #998F77;
+}
+
+.icon {
+    max-height: 2rem;
+    padding: 0 1rem 0 0;
+}
+
+.form-control:focus {
+    border-color: green;
+    box-shadow: 0 0 0 0.2rem rgba(0, 100, 0, 0.25)
+}
+
+#edit-img {
+    margin-top: -50px;
+}
+
+@media (max-width: 1000px) {
+
+    .reg {
+          float: none !important;
+    }
+
+}

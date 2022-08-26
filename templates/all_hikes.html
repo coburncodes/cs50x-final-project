@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    All Hikes
+{% endblock %}
+
+{% block main %}
+    <div class="section">
+        <h1 class="font-weight-bold" >All Hikes: </h1>
+        <h2>{{ number }} of {{ total_hikes }} Completed</h2>
+        <div class="mb-3">
+            <p class="mb-0">Sort:</p>
+            <form action="/all_hikes" method="post">
+                <select name="filter" class="mx-auto w-auto">
+                    <option>Region</option>
+                    <option>Name</option>
+                    <option>Difficulty</option>
+                    <option>Distance</option>
+                    <option>Elevation Change</option>
+                </select>
+                <button class="btn btn-success btn-sm" type="submit">Sort</button>
+            </form>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">area</th>
+                    <th scope="col">name</th>
+                    <th scope="col">difficulty</th>
+                    <th scope="col">miles</th>
+                    <th scope="col">elevation change</th>
+                    <th scope="col">description</th>
+                    <th scope="col">completed?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hike in hikes %}
+                    <tr>
+                        <td>{{ hike["area"] }}</td>
+                        <td><a href="{{ hike["url"] }}" target="_blank" class="text-decoration-none text-success">{{ hike["name"] }}</a></td>
+                        <td>{{ hike["difficulty"] }}</td>
+                        <td>{{ hike["distance"] }}</td>
+                        <td>{{ hike["elevation_change"] }}</td>
+                        <td>{{ hike["description"] }}</td>
+                        {% set count = [] %}
+                        {% for my_hike in my_hikes %}
+                            {% if my_hike["hike_id"] == ((hike["id"])|int) %}
+                                {% if count.append(1) %}{% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not count|length %}
+                            <td>No</td>
+                        {% endif %}
+                        {% if count|length %}
+                            <td>Yes</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

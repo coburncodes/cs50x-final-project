@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <img src="/static/favicon.ico">
+    </div>
+
+    <form action="/register" method="post">
+        <div class="container">
+
+            <div class="row">
+                <div class="mb-3 col">
+                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto reg float-end" id="first_name" name="first_name" placeholder="First Name" type="text">
+                </div>
+                <div class="mb-3 col">
+                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto reg float-start" id="username" name="username" placeholder="Username" type="text">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="mb-3 col">
+                    <input class="form-control mx-auto w-auto reg float-end" id="password" name="password" placeholder="Password" type="password">
+                </div>
+                <div class="mb-3 col">
+                    <input class="form-control mx-auto w-auto reg float-start" id="confirm" name="confirm" placeholder="Confirm Password" type="password">
+                </div>
+            </div>
+
+        </div>
+        <button class="btn btn-success" type="submit">Register</button>
+    </form>
+
+    <div class="container mt-3">
+        <span>Already registered?</span>
+        <a href="/login" class="text-success">Log In</a>
+    </div>
+
+{% endblock %}

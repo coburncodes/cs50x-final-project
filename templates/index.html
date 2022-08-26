@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+    <div class="section">
+        <h1>Welcome, {{ first_name }}!</h1>
+
+        <img src="/static/images/tumalo.jpeg" alt="Tumalo Falls" class="pb-3 mw-100">
+
+        <h5>This is a companion app for <a href="https://www.oregonhikers.org/" class="text-decoration-none text-success">oregonhikers.org</a></h5>
+        <p class="pt-3">Use this app to track your Central Oregon hikes!</p>
+    </div>
+
+{% endblock %}

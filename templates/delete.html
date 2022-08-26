@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Delete a Hike
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <img src="/static/favicon.ico">
+    </div>
+
+    <div class="section">
+        <form action="/delete" method="post">
+
+            <div class="mb-3">
+                <h3>Select Hike:</h3>
+                <select name="hike" id="hike">
+                    {% for my_hike in my_hikes %}
+                        <option value="{{ db.execute("SELECT name FROM hikes WHERE id=?", my_hike["hike_id"])[0]["name"] }}">{{ db.execute("SELECT name FROM hikes WHERE id=?", my_hike["hike_id"])[0]["name"] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-danger" type="submit">Delete</button>
+
+        </form>
+    </div>
+
+{% endblock %}
