@@ -22,14 +22,18 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+# Index route
 @app.route("/")
 @login_required
 def index():
+    # Save vars
     id = session["user_id"]
     first_name = (db.execute("SELECT first_name FROM users WHERE id=?", id))[0]["first_name"]
 
+    # Render template
     return render_template("index.html", first_name=first_name)
 
+# Login route
 @app.route("/login", methods=["POST", "GET"])
 def login():
     # Clear memory
@@ -144,7 +148,7 @@ def all():
     hikes = db.execute("SELECT * FROM hikes")
     # Create list of user's hikes
     my_hikes = db.execute("SELECT * FROM completed WHERE user_id=?", id)
-    number = len(my_hikes)
+    number = db.execute("SELECT hikes FROM users WHERE id=?", id)[0]["hikes"]
     total_hikes = len(hikes)
     found = False
 
@@ -186,56 +190,49 @@ def add():
     if request.method == "POST":
         # Save variables from form
         name = request.form.get("hike")
-        date = request.form.get("date")
         rating = request.form.get("rating")
         review = request.form.get("review")
-        # If user inputs no date
-        if date == "":
-            # Apologize
-            return apology("Input a date", 400)
-        # Otherwise a date was input
+        # Get id of submitted hike
+        hike_id = (db.execute("SELECT id FROM hikes WHERE name=?", name))[0]["id"]
+        # Create list of user's hikes
+        my_hikes = db.execute("SELECT * FROM completed WHERE user_id=?", id)
+        # If its first hike completed
+        if len(my_hikes) < 1:
+            # Add entry
+            db.execute("INSERT INTO completed (user_id, hike_id, rating, review) VALUES (?, ?, ?, ?)", id, hike_id, rating, review)
+            # Increment counter
+            number += 1
+            # Update number of hikes
+            db.execute("UPDATE users SET hikes=? WHERE id=?", number, id)
+            # Send user to confirmation page
+            return render_template("confirmed.html", name=name, number=number, total_hikes=total_hikes)
+        # Otherwise not first completed
         else:
-            # Get id of submitted hike
-            hike_id = (db.execute("SELECT id FROM hikes WHERE name=?", name))[0]["id"]
-            # Create list of user's hikes
-            my_hikes = db.execute("SELECT * FROM completed WHERE user_id=?", id)
-            # If its first hike completed
-            if len(my_hikes) < 1:
-                # Add entry
-                db.execute("INSERT INTO completed (user_id, hike_id, date, rating, review) VALUES (?, ?, ?, ?, ?)", id, hike_id, date, rating, review)
-                # Increment counter
+            # Loop over user's hikes
+            for hike in my_hikes:
+                # If user already logged this
+                if int(hike_id) == hike["hike_id"]:
+                    # Indicate
+                    indicator = True
+                    break
+                # Otherwise its new
+                else:
+                    # Indicate
+                    indicator = False
+            # If input hike matched any hike in my_hikes
+            if indicator == True:
+                # Apologize
+                    return apology("Already completed this hike", 400)
+            # Otherwise, hike is new to my_hikes
+            else:
+                # Add to database
+                db.execute("INSERT INTO completed (user_id, hike_id, rating, review) VALUES (?, ?, ?, ?)", id, hike_id, rating, review)
+                # Increment hike count
                 number += 1
-                # Update number of hikes
+                # Update user's hike count
                 db.execute("UPDATE users SET hikes=? WHERE id=?", number, id)
                 # Send user to confirmation page
                 return render_template("confirmed.html", name=name, number=number, total_hikes=total_hikes)
-            # Otherwise not first completed
-            else:
-                # Loop over user's hikes
-                for hike in my_hikes:
-                    # If user already logged this
-                    if int(hike_id) == hike["hike_id"]:
-                        # Indicate
-                        indicator = True
-                        break
-                    # Otherwise its new
-                    else:
-                        # Indicate
-                        indicator = False
-                # If input hike matched any hike in my_hikes
-                if indicator == True:
-                    # Apologize
-                        return apology("Already completed this hike", 400)
-                # Otherwise, hike is new to my_hikes
-                else:
-                    # Add to database
-                    db.execute("INSERT INTO completed (user_id, hike_id, date, rating, review) VALUES (?, ?, ?, ?, ?)", id, hike_id, date, rating, review)
-                    # Increment hike count
-                    number += 1
-                    # Update user's hike count
-                    db.execute("UPDATE users SET hikes=? WHERE id=?", number, id)
-                    # Send user to confirmation page
-                    return render_template("confirmed.html", name=name, number=number, total_hikes=total_hikes)
 
     # Otherwise user reached page by GET
     else:
@@ -248,9 +245,9 @@ def add():
 def my_hikes():
     # Save variables
     id = session["user_id"]
-    my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?)", id)
+    my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) AND user_id=?", id, id)
     hikes = db.execute("SELECT * FROM hikes")
-    number = len(my_hikes)
+    number = db.execute("SELECT hikes FROM users WHERE id=?", id)[0]["hikes"]
     total_hikes = len(hikes)
 
     # If user submits sort
@@ -260,13 +257,13 @@ def my_hikes():
 
         # Orient data according to sort request
         if sort == "Region":
-            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY area", id)
+            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY area AND user_id=?", id, id)
         if sort == "Name":
-            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY name", id)
+            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY name AND user_id=?", id, id)
         if sort == "Difficulty":
-            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY difficulty", id)
+            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY difficulty AND user_id=?", id, id)
         if sort == "Rating":
-            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY rating", id)
+            my_hikes = db.execute("SELECT * FROM hikes INNER JOIN completed ON hikes.id=completed.hike_id WHERE hikes.id IN (SELECT hike_id FROM completed WHERE user_id=?) ORDER BY rating AND user_id=?", id, id)
 
         # Render page
         return render_template("my_hikes.html", my_hikes=my_hikes, db=db, id=id, number=number, total_hikes=total_hikes)
@@ -274,8 +271,6 @@ def my_hikes():
     # Otherwise reached by GET
     else:
         return render_template("my_hikes.html", my_hikes=my_hikes, db=db, id=id, number=number, total_hikes=total_hikes)
-
-
 
 
 
@@ -287,26 +282,19 @@ def edit():
     my_hikes = db.execute("SELECT * FROM completed WHERE user_id=?", id)
     # Save variables from form
     name = request.form.get("hike")
-    date = request.form.get("date")
     review = request.form.get("review")
     rating = request.form.get("rating")
 
     # When user clicks update
     if request.method == "POST":
-        # If user didn't enter date
-        if date == "":
-            # Apologize
-            return apology("Input a date", 400)
-        # Otherwise
-        else:
-            # Get hike's id from hikes database
-            hike_id = (db.execute("SELECT id FROM hikes WHERE name=?", name))[0]["id"]
-            # Get specific id from completed database
-            completed_id = (db.execute("SELECT id FROM completed WHERE hike_id=? AND user_id=?", hike_id, id))[0]["id"]
-            # Update the database
-            db.execute("UPDATE completed SET date=?, rating=?, review=? WHERE id=?", date, rating, review, completed_id)
-            # Return to my hikes
-            return redirect("my_hikes")
+        # Get hike's id from hikes database
+        hike_id = (db.execute("SELECT id FROM hikes WHERE name=?", name))[0]["id"]
+        # Get specific id from completed database
+        completed_id = (db.execute("SELECT id FROM completed WHERE hike_id=? AND user_id=?", hike_id, id))[0]["id"]
+        # Update the database
+        db.execute("UPDATE completed SET rating=?, review=? WHERE id=?", rating, review, completed_id)
+        # Return to my hikes
+        return redirect("my_hikes")
     # Otherwise user reached page by GET request
     else:
         # Render edit page
@@ -355,19 +343,28 @@ def update_password():
     # If user clicks submit
     if request.method == "POST":
         # Save variables
+        old_pw = request.form.get("old_password")
         new_password = request.form.get("password")
         new_confirm = request.form.get("confirm")
-        # If the passwords don't match
-        if not new_password == new_confirm:
+        old_pw_hash = db.execute("SELECT hash FROM users WHERE id=?", id)[0]["hash"]
+
+        # If old password doesn't match current
+        if not check_password_hash(old_pw_hash, old_pw):
             # Apologize
-            return apology("Password must match confirmation", 400)
-        # Otherwise they match
+            return apology("Old password is incorrect", 400)
+        # Otherwise old pw is correct
         else:
-            db.execute("UPDATE users SET hash = ? WHERE id=?", generate_password_hash(new_password), id)
-            # Set new var
-            new_info = True
-            # Return confirm page
-            return render_template("confirmed.html", new_info=new_info)
+            # If the passwords don't match
+            if not new_password == new_confirm:
+                # Apologize
+                return apology("Password must match confirmation", 400)
+            # Otherwise they match
+            else:
+                db.execute("UPDATE users SET hash = ? WHERE id=?", generate_password_hash(new_password), id)
+                # Set new var
+                new_info = True
+                # Return confirm page
+                return render_template("confirmed.html", new_info=new_info)
 
     # Otherwise page reached by GET request
     else:
